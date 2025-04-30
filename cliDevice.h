@@ -32,7 +32,8 @@ class CliDevice : public Cli {
             (*ctx->keepAlive)();
             File entry = root.openNextFile();
             if(!entry) break;
-            const char* name = entry.name();
+            const char * name = entry.name();
+            //Serial.println(name);
             if(name && strlen(name) > 4 && strcmp(name + strlen(name) - 4, ".MP3") == 0){
               out->println(name);
             }
@@ -45,14 +46,28 @@ class CliDevice : public Cli {
         const char * play[] = {"p", "play", "P", nullptr};
         if(isSubcommand(play)){
             if(strlen(args[2]) == 0){
-                out->println("Please enter the file to play.");
+                out->println("Please enter the track to play.");
                 return CMD_ERROR;
             }
 
-            char file[20];
-            snprintf(file, sizeof(file), "%s.mp3", args[2]);
             auto audio = ctx->audio;
-            audio->play(file);
+            audio->play(args[2]);
+            return CMD_OK;
+        }
+
+        const char * stop[] = {"s", "stop", "halt", nullptr};
+        if(isSubcommand(stop)){
+            if(!ctx->audio->isPlaying()){
+                out->println("Sound is not playing");
+                return CMD_OK;    
+            }
+            ctx->audio->stopPlaying();
+            return CMD_OK;
+        }
+
+        const char * test[] = {"t", "test", "tst", nullptr};
+        if(isSubcommand(test)){
+            ctx->audio->test();
             return CMD_OK;
         }
 
@@ -341,6 +356,12 @@ class CliDevice : public Cli {
     };
 
     int cmd_fs(){
+
+        if(ctx->audio->isPlaying()){
+            out->println("Filesystem commands are disabled while playing sound");
+            return CMD_OK;
+        }
+
         if(!SD.begin(SD_CS)) {
             out->println("SD card initialization failed. Check a card is inserted.");
             return CMD_ERROR;
@@ -512,9 +533,6 @@ class CliDevice : public Cli {
 
         #define CLI_COMMAND_ENTRY(name, alias) \
             { #name, static_cast<helpHandler>(&CliDevice::help_##name), static_cast<commandHandler>(&CliDevice::cmd_##name), alias }
-
-        // #define CLI_LOCAL_COMMAND_ENTRY(name, alias) \
-        //     { #name, static_cast<helpHandler>(&CliDevice::help_##name), static_cast<commandHandler>(&CliDevice::cmd_##name), alias, 1 }
 
         static CMD cmd_defs[] = {
             CLI_COMMAND_ENTRY(dispatcher, a_dispatcher),

@@ -8,6 +8,7 @@
 #include "dispatcher.h"
 #include "Actions.h"
 #include "cliDevice.h"
+#include "CAN.h"
 #include "Keys.h"
 #include "relay.h"
 #include "AudioBoard.h"
@@ -20,6 +21,7 @@ FileLogger    error("ERROR", 1);   //1: Verbose
 Actions actions;
 Dispatcher<Actions> dispatcher(&actions);
 Keys keys;
+CAN can;
 Relay relay(RELAY_PIN);
 AudioBoard audio;
 
@@ -35,6 +37,7 @@ void keepAlive(){
 static CliContext context = {
   .relay = &relay,
   .audio = &audio,
+  .can = &can,
   .dispatcher = &dispatcher,
   .keepAlive = keepAlive
 };
@@ -52,15 +55,19 @@ void setup(){
   // If fatal, it will halt execution
   //diagnostics.run();
 
-  actions.init(&relay, &audio, &keys, &dispatcher, keepAlive);
+  relay.init();
+  audio.init();
+  can.init(0xEE); //The identifier for this controller 
+                  //ToDo: adjust based on the actual protocol
+
+  actions.init(&relay, &audio, &can, &keys, &dispatcher, keepAlive);
 
   // //Common actions -> 1 TICK = 1 sec (TICK_IN_MILLIS in Defaults.h) 
-  dispatcher.add("CCAN", "Looks for CAN Commands", &Actions::checkCANCommandAction, 2);
-  dispatcher.add("PING", "Sends a PING CAN Command to signal status", &Actions::SendPingCANCommandAction, MIN_TO_TICKS(1));
-  dispatcher.add("ACTV", "Animation activation", &Actions::activateAnimationAction, MIN_TO_TICKS(5));
-  dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
+  dispatcher.add("CCAN", "Looks for CAN Commands", &Actions::checkCANCommandAction, 1);
+  dispatcher.add("STAT", "Sends a device Status command", &Actions::sendStatusCANCommandAction, 10);  // Perhaps we can run this less frequently MIN_TO_TICKS(1));
+  //dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
 
-  //Uncomment for testing actons through the CLIs
+  //Uncomment for testing actions through the CLIs
   #ifndef RELEASE
     dispatcher.disableAllActions();
   #endif
@@ -72,10 +79,6 @@ void setup(){
 
   //Last acction is to enable WDT with ~10 seconds alarm. Anything that will take time should call "keepALive" tpo avoid a reset.
   Watchdog.enable(WDT_TIMEOUT);
-
-  if(keys.isA() && keys.isC()){
-    //ToDo: Put the device in "LearningMode"
-  }
 }
 
 

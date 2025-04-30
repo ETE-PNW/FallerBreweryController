@@ -6,8 +6,6 @@
 #include <Wire.h>
 #include <Adafruit_VS1053.h>
 
-#define VS1053_RESET   -1     // VS1053 reset pin (not used!)
-
 #include "Logger.h"
 #include "wd.h"
 
@@ -15,20 +13,12 @@ extern ConsoleLogger trace;
 extern ConsoleLogger info;
 extern FileLogger error;
 
+#define VS1053_RESET   -1     // VS1053 reset pin (not used!)
 #define VS1053_CS       6     // VS1053 chip select pin (output)
 #define VS1053_DCS     10     // VS1053 Data/command select pin (output)
 #define CARDCS          5     // Card chip select pin
 #define VS1053_DREQ     9     // VS1053 Data request, ideally an Interrupt pin
 
-/*
-  The audio board includes an OLED display that can be used to print messages.
-  OLEDPrinter is just a DisplayPrinter that uses the Adafruit_SSD1306 library.
-  OLEDPrinter will override some functions to accomodate for the tiny screen.
-  For example, there's no space for Author/id/clock. We use all real estate for 
-  the quote.
-  We simply pass on the print calls to the OLEDPrinter in most cases IN ADDITION
-  to playing an audio files.
-*/
 class AudioBoard {
 
   Adafruit_VS1053_FilePlayer audioPlayer;   //Pinout: https://learn.adafruit.com/adafruit-music-maker-featherwing/pinouts
@@ -38,30 +28,52 @@ public:
   AudioBoard() : audioPlayer(VS1053_RESET, VS1053_CS, VS1053_DCS, VS1053_DREQ, CARDCS){
   }
 
-  //Only available on AUDIO PRINTERS
+  int init(){
+    auto ret = audioPlayer.begin();
+    if(!ret){
+      error.log("AudioBoard", "Error initializing audio board");
+      return ret;
+    }
+    trace.log("AudioBoard", "Board initialized");
+    audioPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
+    audioPlayer.setVolume(0, 0);  //MAX Volume
+
+    if(!SD.begin(CARDCS)) {
+      error.log("AudioBoard", "SD card initialization failed. Check a card is inserted.");
+      return -1;
+    }
+
+    return ret;
+  }
+
   void play(const char * track){
-    if(!audioPlayer.begin()){
-      error.log("audioPrinter", "play: Error initializing audio board", track);
+  
+    if(audioPlayer.playingMusic){
+      trace.log("AudioBoard", "A track is already playing");
       return;
     }
-     
-    audioPlayer.setVolume(0, 0);
 
-    WD d;
-      char audioFile[15];     // {track}.mp3
-      snprintf(audioFile, sizeof(audioFile), "%s.mp3", track);
-      audioPlayer.playFullFile(audioFile); 
-  };
+    trace.log("AudioBoard", "Playing track: ", track);
+
+    char audioFile[15];     // {track}.mp3
+    snprintf(audioFile, sizeof(audioFile), "%s.mp3", track);
+    audioPlayer.startPlayingFile(audioFile);
+  }
+
+  int isPlaying(){
+    return audioPlayer.playingMusic;
+  }
+
+  void stopPlaying(){
+    trace.log("AudioBoard", "Stop playing");
+    audioPlayer.stopPlaying();
+  }
 
   void test(){
-    audioPlayer.begin();
+    trace.log("AudioBoard", "Testing board");
     audioPlayer.setVolume(1,1);
     audioPlayer.sineTest(0x44, 500);
     return;
-  }
-
-  void reset(){
-    audioPlayer.reset();
   }
 };
 

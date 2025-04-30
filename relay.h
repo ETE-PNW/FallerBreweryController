@@ -1,16 +1,23 @@
 #ifndef _RELAY_H
 #define _RELAY_H
 
+#define RELAY_PIN 11 
+
 class Relay {
   int pin;
+  int state;
 public:
-  Relay(int pin) : pin(pin){
+  Relay(int pin) : pin(RELAY_PIN){
   }
 
-  void Init(){
+  void init(){
     pinMode(pin, OUTPUT);
     off();
   }
+
+  int isOn(){
+    return state;
+  };
 
   void onFor(long ms){
     on();
@@ -19,13 +26,13 @@ public:
   }
 
   void on(){
-    Serial.println("ON");
     digitalWrite(pin, HIGH);
+    state = 1;
   }
 
   void off(){
-    Serial.println("OFF");
     digitalWrite(pin, LOW);
+    state = 0;
   }
 };
 

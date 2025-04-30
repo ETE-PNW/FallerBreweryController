@@ -35,9 +35,9 @@ private:
     }
 
     void executeAction(DispatcherAction<T> &action) {
-        logMemoryUsage("Memory before: ");
+        //logMemoryUsage("Memory before: ");
         (instance->*action.handler)();
-        logMemoryUsage("Memory after: ");
+        //logMemoryUsage("Memory after: ");
     }
 
 public:

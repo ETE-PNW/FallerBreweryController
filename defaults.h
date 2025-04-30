@@ -1,12 +1,10 @@
 #ifndef _DEFAULTS_H
 #define _DEFAULTS_H
   
-#define DEVICE_VERSION "1.0.0"    //Only when compiling from the IDE and downloading directly to the device
-#define RELEASE
+#define DEVICE_VERSION "1.0.0"
+//#define RELEASE
 
-#define SD_CS 5
-
-#define RELAY_PIN 4         //ToDo: Check if this is the right pin for the relay
+#define SD_CS   5
 
 typedef enum { KEY_A = 11, KEY_B, KEY_C } KEYS; //ToDo: adjust to actual hardware
 
@@ -19,5 +17,8 @@ typedef enum { KEY_A = 11, KEY_B, KEY_C } KEYS; //ToDo: adjust to actual hardwar
 // CLI Defs
 #define CLI_LINE_BUF_SIZE  70   //Maximum input string length
 #define CLI_MAX_NUM_ARGS   10   //Maximum number of arguments
+
+// CAN
+#define MAX_CAN_COMMAND 10
 
 #endif

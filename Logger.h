@@ -40,6 +40,12 @@ public:
     Serial.println(value);
   };
 
+  void logHex(const char * module, const char * msg, const char value){
+    logHeader(module, msg);
+    Serial.print("|");
+    Serial.println(value, HEX);
+  };
+
   void logHex(const char * module, const char * msg, const char * buffer, size_t length){
     logHeader(module, msg);
     Serial.println();

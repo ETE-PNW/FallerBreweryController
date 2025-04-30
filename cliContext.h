@@ -2,7 +2,7 @@
 #define CLI_CONTEXT_H
 
 #include "Defaults.h"
-//#include "Actions.h"
+#include "CAN.h"
 #include "dispatcher.h"
 
 class Relay;
@@ -13,6 +13,7 @@ class CliContext {
 public:
   Relay * relay;
   AudioBoard * audio;
+  CAN * can;
   Dispatcher<Actions> * dispatcher;
   void (*keepAlive)();
 };
