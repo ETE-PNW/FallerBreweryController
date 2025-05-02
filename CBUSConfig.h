@@ -6,6 +6,8 @@
 #include <Arduino.h>
 #include <SD.h>
 
+enum { CBUS_CFG_INIT_OK, CBUS_CFG_INIT_FAIL };
+
 class CBUSConfig {
 private:
     int nodeNumber = 0;
@@ -38,8 +40,8 @@ public:
 		int init(const char* filename){
 			File file = SD.open(filename);
 			if(!file) {
-				trace.log("CBUSCOnfig", "Failed to open config file");
-				return -1;
+				trace.log("CBUSConfig", "Failed to open config file");
+				return CBUS_CFG_INIT_FAIL;
 			}
 
 			char line[64];  // buffer for reading lines
@@ -78,7 +80,7 @@ public:
 			}
 
 			file.close();
-			return 0;
+			return CBUS_CFG_INIT_OK;
     }
 
     int getNodeNumber() {

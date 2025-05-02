@@ -2,7 +2,7 @@
 #define _DEFAULTS_H
   
 #define DEVICE_VERSION "1.0.0"
-//#define RELEASE
+#define RELEASE
 
 #define SD_CS   5
 #define CAN_BAUDRATE 125000
