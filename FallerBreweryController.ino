@@ -8,10 +8,11 @@
 #include "dispatcher.h"
 #include "Actions.h"
 #include "cliDevice.h"
-#include "CAN.h"
+#include "CBUS.h"
 #include "Keys.h"
 #include "relay.h"
 #include "AudioBoard.h"
+#include "CBUSConfig.h"
 
 ConsoleLogger trace("DEBUG");
 ConsoleLogger info("INFO ");
@@ -21,7 +22,8 @@ FileLogger    error("ERROR", 1);   //1: Verbose
 Actions actions;
 Dispatcher<Actions> dispatcher(&actions);
 Keys keys;
-CAN can;
+CBUS cbus;
+CBUSConfig config;
 Relay relay(RELAY_PIN);
 AudioBoard audio;
 
@@ -37,8 +39,8 @@ void keepAlive(){
 static CliContext context = {
   .relay = &relay,
   .audio = &audio,
-  .can = &can,
   .dispatcher = &dispatcher,
+  .config = &config,
   .keepAlive = keepAlive
 };
 
@@ -51,20 +53,24 @@ void setup(){
     while(!Serial){}  // ONLY FOR DEBUG
   #endif
   
-  // ToDo: Checks all subsystems for any (HW?) failure: SD, Logs, etc.
-  // If fatal, it will halt execution
-  //diagnostics.run();
-
+  //Initialize hardware & halt if any failures (can't function with these modules down)
   relay.init();
-  audio.init();
-  can.init(0xEE); //The identifier for this controller 
-                  //ToDo: adjust based on the actual protocol
+  auto ret = audio.init();
+  ret += config.init("CBCFG.TXT");
+  ret += cbus.init();
 
-  actions.init(&relay, &audio, &can, &keys, &dispatcher, keepAlive);
+  if(ret > 0){
+    trace.log("Main", "Initialization failed. Halting execution");
+    while(1){
+      delay(10);
+    }
+  }
+
+  actions.init(&relay, &audio, &cbus, &config, &keys, &dispatcher, keepAlive);
 
   // //Common actions -> 1 TICK = 1 sec (TICK_IN_MILLIS in Defaults.h) 
-  dispatcher.add("CCAN", "Looks for CAN Commands", &Actions::checkCANCommandAction, 1);
-  dispatcher.add("STAT", "Sends a device Status command", &Actions::sendStatusCANCommandAction, 10);  // Perhaps we can run this less frequently MIN_TO_TICKS(1));
+  dispatcher.add("CBUS", "Looks for CBUS Commands", &Actions::checkCBUSCommandAction, 1);
+  //dispatcher.add("STAT", "Sends a device Status command", &Actions::sendStatusCANCommandAction, 10);  // Perhaps we can run this less frequently MIN_TO_TICKS(1));
   //dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
 
   //Uncomment for testing actions through the CLIs

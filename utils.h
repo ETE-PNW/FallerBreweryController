@@ -15,6 +15,13 @@ typedef enum encodingstate { NORMAL, TWO_BYTE, THREE_BYTE_1, THREE_BYTE_2 } ENCO
 class Utils {
 public:
 
+  static void blink(long time){
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(time);  
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(time);   
+  }
+
   static void dumpHex(Stream * out, const void * data, size_t size){
     char ascii[17];
     ascii[16] = '\0'; // Null-terminate the ASCII buffer

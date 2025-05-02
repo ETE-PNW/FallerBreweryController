@@ -5,6 +5,7 @@
 //#define RELEASE
 
 #define SD_CS   5
+#define CAN_BAUDRATE 125000
 
 typedef enum { KEY_A = 11, KEY_B, KEY_C } KEYS; //ToDo: adjust to actual hardware
 

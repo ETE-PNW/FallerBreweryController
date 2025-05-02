@@ -12,34 +12,34 @@ class Actions;
 #include "utils.h"
 #include "relay.h"
 #include "keys.h"
-#include "CAN.h"
+#include "CBUS.h"
+#include "CBUSConfig.h"
 #include "AudioBoard.h"
-
-enum Command : char {
-  PLAY_AUDIO  = 'P',
-  STOP_AUDIO  = 'S',
-  MOTOR       = 'M',
-  STATUS      = 'F'
-};
 
 class Actions {
   
   Relay * relay;
   AudioBoard * audio;
-  CAN * can;
+  CBUS * cbus;
+  CBUSConfig * config;
   Dispatcher<Actions> * dispatcher;
   Keys * keys;
   void (*keepAlive)();
   
 public:
+
+  Actions() : relay(nullptr), audio(nullptr), dispatcher(nullptr), keys(nullptr), keepAlive(nullptr), cbus(nullptr), config(nullptr) {
+  };
+
   // Initialize all static members
-  void init(Relay * r, AudioBoard * a, CAN * can, Keys * k, Dispatcher<Actions> * d, void (*wdtCb)()){
+  void init(Relay * r, AudioBoard * a, CBUS * cbus, CBUSConfig * c, Keys * k, Dispatcher<Actions> * d, void (*wdtCb)()){
     this->audio = a;
     this->relay = r;
     this->keys = k;
-    this->can = can;
     this->dispatcher = d;
     this->keepAlive = wdtCb;
+    this->cbus = cbus;
+    this->config = c;
   };
   
   // Start the motor
@@ -75,48 +75,53 @@ public:
     }
   };
 
-  void checkCANCommandAction(){
-    char commandData[MAX_CAN_COMMAND];
-    int length;
-    auto cmd = can->getCommand(commandData, &length);  
+  void checkCBUSCommandAction(){
+    int nodeNumber, eventNumber;
+    auto cmd = cbus->getEvent(&nodeNumber, &eventNumber);
 
     if(!cmd){
       trace.log("Actions", "No command received");
       return;
     }
 
-    commandData[length] = '\0';
-
-    trace.logHex("Actions", "Command received: ", cmd);
-    switch(cmd){
-      case STOP_AUDIO:
-        trace.log("Actions", "Stop playing command received");
-        audio->stopPlaying();
-        break;
-      case PLAY_AUDIO:
-        trace.log("Actions", "Play command received");
-        trace.logHex("Actions", "Command data: ", commandData, length);
-        //The track is part of the payload after the NodeId
-        audio->play(&commandData[1]);
-        break;
-      case MOTOR:
-        trace.log("Actions", "Relay command received");
-        if(commandData[1] == '1' || commandData[1] == 'O'){
-          relay->on();
-        } else {
-          relay->off();
-        }
-        break;
-      default:
-        trace.log("Actions", "Unknown command received");
+    if(nodeNumber != config->getNodeNumber()){
+      trace.log("Actions", "Ignoring Event from Node: ", nodeNumber);
+      return;
     }
-  };
+    
+    //Check if event number is mapped to the relay
+    if(eventNumber == config->getRelayEventNumber()){
+      if(cmd == ACON){
+        trace.log("Actions", "Event for activation of relay received");
+        relay->on();
+        return;
+      }
 
-  void sendStatusCANCommandAction(){
-    char commandData[MAX_CAN_COMMAND];
-    snprintf(commandData, sizeof(commandData), "A%cM%c", audio->isPlaying() ? '1' : '0', relay->isOn() ? '1' : '0');
-    trace.log("Actions", "Sending Status CAN command", commandData);
-    can->sendCommand(STATUS, commandData);
+      if(cmd == ACOF){
+        trace.log("Actions", "Event for deactivation of relay received");
+        relay->off();
+        return;
+      }
+    }
+
+    //Check if event number is mapped to any audio file
+    char * track = config->getAudioByEventNumber(eventNumber);
+    if(track){
+      if(cmd == ACON){
+        trace.log("Actions", "Event for activation of audio received");
+        audio->play(track);
+        return;
+      }
+      if(cmd == ACOF){
+        trace.log("Actions", "Event for deactivation of audio received");
+        audio->stopPlaying();
+        return;
+      }
+    }
+
+    // The event comes from a recognized node, but it is not mapped to any action here
+    trace.log("Actions", "Unmapped event: ", eventNumber);
+    return;
   };
 };
 

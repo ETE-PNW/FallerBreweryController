@@ -19,6 +19,8 @@ extern FileLogger error;
 #define CARDCS          5     // Card chip select pin
 #define VS1053_DREQ     9     // VS1053 Data request, ideally an Interrupt pin
 
+enum AudioBoardInit { AUDIOBOARD_INIT_OK = 0, AUDIOBOARD_INIT_FAIL };
+
 class AudioBoard {
 
   Adafruit_VS1053_FilePlayer audioPlayer;   //Pinout: https://learn.adafruit.com/adafruit-music-maker-featherwing/pinouts
@@ -32,7 +34,7 @@ public:
     auto ret = audioPlayer.begin();
     if(!ret){
       error.log("AudioBoard", "Error initializing audio board");
-      return ret;
+      return AUDIOBOARD_INIT_FAIL;
     }
     trace.log("AudioBoard", "Board initialized");
     audioPlayer.useInterrupt(VS1053_FILEPLAYER_PIN_INT);
@@ -40,10 +42,10 @@ public:
 
     if(!SD.begin(CARDCS)) {
       error.log("AudioBoard", "SD card initialization failed. Check a card is inserted.");
-      return -1;
+      return AUDIOBOARD_INIT_FAIL;
     }
 
-    return ret;
+    return AUDIOBOARD_INIT_OK;
   }
 
   void play(const char * track){

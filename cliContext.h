@@ -2,8 +2,8 @@
 #define CLI_CONTEXT_H
 
 #include "Defaults.h"
-#include "CAN.h"
 #include "dispatcher.h"
+#include "CBUSConfig.h"
 
 class Relay;
 class AudioBoard;
@@ -13,8 +13,8 @@ class CliContext {
 public:
   Relay * relay;
   AudioBoard * audio;
-  CAN * can;
   Dispatcher<Actions> * dispatcher;
+  CBUSConfig * config;
   void (*keepAlive)();
 };
 

@@ -517,6 +517,26 @@ class CliDevice : public Cli {
         return CMD_HELP;
     };
 
+    void help_cbus(){
+        out->println("Displays the CBUS interface configuration.");
+    };
+
+    int cmd_cbus(){
+        out->println("CBUS interface configuration:");
+        out->print("Node number: ");
+        out->println(ctx->config->getNodeNumber());
+        out->print("Relay event number: ");
+        out->println(ctx->config->getRelayEventNumber());
+        for(int i = 0; i < ctx->config->getMappedSoundEvents(); i++){
+            out->print("Event [");
+            out->print(ctx->config->getMappedSoundEvent(i));
+            out->print("] mapped to track [");
+            out->print(ctx->config->getMappedSoundTrack(i));
+            out->println("]");
+        }
+        return CMD_OK;
+    };
+
     CMDS * buildCmds(){
         //All aliases for commands
         static const char * a_dispatcher[] = {"dispatcher", "disp", nullptr };
@@ -530,6 +550,7 @@ class CliDevice : public Cli {
         static const char * a_logs[] = {"log", nullptr};
         static const char * a_audio[] = {"audio", "aud", nullptr};
         static const char * a_relay[] = {"relay", "rly", nullptr};
+        static const char * a_cbus[] = {"cbus", nullptr};
 
         #define CLI_COMMAND_ENTRY(name, alias) \
             { #name, static_cast<helpHandler>(&CliDevice::help_##name), static_cast<commandHandler>(&CliDevice::cmd_##name), alias }
@@ -544,7 +565,8 @@ class CliDevice : public Cli {
             CLI_COMMAND_ENTRY(version, a_version),
             CLI_COMMAND_ENTRY(fs, a_fs),
             CLI_COMMAND_ENTRY(logs, a_logs),
-            CLI_COMMAND_ENTRY(audio, a_audio)
+            CLI_COMMAND_ENTRY(audio, a_audio),
+            CLI_COMMAND_ENTRY(cbus, a_cbus)
         };
         static CMDS commands = {
             sizeof(cmd_defs)/sizeof(CMD),
@@ -592,28 +614,6 @@ private:
             entry.close();
         }
     };
-
-    // int promptForNumber(int min, int max, const char * prompt, const char * errorMsg){
-    //     static char num[10];
-    //     int n;
-    //     int done = 0;
-    //     do{
-    //         out->print(prompt);
-    //         readLine(num, sizeof(num));
-    //         n = atoi(num);
-    //         if(n >= min && n <= max){
-    //             done = 1;
-    //         } else {
-    //             out->print("Invalid input. Must be a number between ");
-    //             out->print(min);
-    //             out->print(" and ");
-    //             out->println(max);
-    //             out->println(errorMsg);
-    //     }
-    //     }while(!done);
-
-    //     return n;
-    // };
 };
 
 #endif

@@ -1,0 +1,14 @@
+# Node Number the module will listen to
+NN=128
+
+# Relay Event number
+RELAY_EN=3
+
+# Sound Event numbers
+# Event numbers map to an mp3 file, e.g. steam=8 means, 
+# "when event number = 8, pleay steam.mp3"
+
+001=4
+002=5
+003=7
+steam=8
