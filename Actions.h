@@ -25,10 +25,12 @@ class Actions {
   Dispatcher<Actions> * dispatcher;
   Keys * keys;
   void (*keepAlive)();
+
+  int runningCount;
   
 public:
 
-  Actions() : relay(nullptr), audio(nullptr), dispatcher(nullptr), keys(nullptr), keepAlive(nullptr), cbus(nullptr), config(nullptr) {
+  Actions() : relay(nullptr), audio(nullptr), dispatcher(nullptr), keys(nullptr), keepAlive(nullptr), cbus(nullptr), config(nullptr), runningCount(0) {
   };
 
   // Initialize all static members
@@ -57,21 +59,29 @@ public:
   // Play the default track
   void playDefaultTrackAction(){
     trace.log("Actions", "Playing default track");
-    audio->play("001.mp3");
+    audio->play("001");
   };
 
   void checkKeysAction(){
     if(keys->isA()){
-      trace.log("Actions", "Key A pressed: startMotorAction");
-      startMotorAction();
+      trace.log("Actions", "Key A pressed");
+      if(runningCount == 0){  //Button was not pressed
+        startMotorAction();
+        playDefaultTrackAction();
+        runningCount = SEC_TO_TICKS(10);
+      }
+      return;
     }
-    if(keys->isB()){
-      trace.log("Actions", "Key B pressedn: stopMotorAction");
+
+    if(runningCount > 1){
+      runningCount--;
+      return;
+    }
+
+    if(runningCount == 1){
       stopMotorAction();
-    }
-    if(keys->isC()){
-      trace.log("Actions", "Key C pressed: playing default track");
-      playDefaultTrackAction();
+      audio->stopPlaying();
+      runningCount = 0;
     }
   };
 

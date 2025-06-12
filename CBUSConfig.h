@@ -47,12 +47,12 @@ public:
 			char line[64];  // buffer for reading lines
 			while(file.available()) {
 				readLine(file, line, sizeof(line));
-				trim(line);
 
 				if(line[0] == '#' || line[0] == '\0') {
 					continue; // comment or empty line
 				}
 
+				trim(line);
 				char * equalSign = strchr(line, '=');
 				if(!equalSign) continue;
 

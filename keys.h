@@ -7,42 +7,28 @@
 
 class Keys {
 
-  unsigned long lastDebounceTime[3];
+  unsigned long lastDebounceTime;
+  
+public:
+  Keys(){
+    pinMode(KEY_A, INPUT_PULLUP);
 
-  int isKey(KEYS key){
-    int reading = digitalRead(key);
+    lastDebounceTime = millis();
+  }
+
+  int isA(){
+    int reading = digitalRead(KEY_A);
     
     if(reading == HIGH){
       return 0;
     }
 
-    if((millis() - lastDebounceTime[key]) > DEBOUNCE_DELAY) {
-      lastDebounceTime[key] = millis();
+    if((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+      lastDebounceTime = millis();
       return 1;
     }
 
-    return 0;    
-  }
-  
-public:
-  Keys(){
-    pinMode(KEY_A, INPUT_PULLUP);
-    pinMode(KEY_B, INPUT_PULLUP);
-    pinMode(KEY_C, INPUT_PULLUP);
-
-    lastDebounceTime[0] = lastDebounceTime[1] = lastDebounceTime[2] = millis();
-  }
-
-  int isA(){
-    return isKey(KEY_A);
-  }
-
-  int isB(){
-    return isKey(KEY_B);
-  }
-
-  int isC(){
-    return isKey(KEY_C);
+    return 0;
   }
 };
 

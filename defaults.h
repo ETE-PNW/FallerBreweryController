@@ -7,11 +7,12 @@
 #define SD_CS   5
 #define CAN_BAUDRATE 125000
 
-typedef enum { KEY_A = 11, KEY_B, KEY_C } KEYS; //ToDo: adjust to actual hardware
+typedef enum { KEY_A = 14, KEY_B, KEY_C } KEYS; //ToDo: adjust to actual hardware
 
-#define TICK_IN_MILLIS    1000
+#define TICK_IN_MILLIS    500
 #define MIN_TO_TICKS(x)   (x*60*1000/TICK_IN_MILLIS)
 #define HR_TO_TICKS(x)    (x*3600*1000/TICK_IN_MILLIS)
+#define SEC_TO_TICKS(x)   (x*1000/TICK_IN_MILLIS)
 
 #define WDT_TIMEOUT       15000 //time in mS for the WDT
 

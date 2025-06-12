@@ -69,9 +69,8 @@ void setup(){
   actions.init(&relay, &audio, &cbus, &config, &keys, &dispatcher, keepAlive);
 
   // //Common actions -> 1 TICK = 1 sec (TICK_IN_MILLIS in Defaults.h) 
-  dispatcher.add("CBUS", "Looks for CBUS Commands", &Actions::checkCBUSCommandAction, 1);
-  //dispatcher.add("STAT", "Sends a device Status command", &Actions::sendStatusCANCommandAction, 10);  // Perhaps we can run this less frequently MIN_TO_TICKS(1));
-  //dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
+  dispatcher.add("CBUS", "Looks for CBUS Commands", &Actions::checkCBUSCommandAction, 2);
+  dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
 
   //Uncomment for testing actions through the CLIs
   #ifndef RELEASE
