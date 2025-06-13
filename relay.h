@@ -7,7 +7,7 @@ class Relay {
   int pin;
   int state;
 public:
-  Relay(int pin) : pin(RELAY_PIN){
+  Relay(int pin = RELAY_PIN) : pin(pin){
   }
 
   void init(){

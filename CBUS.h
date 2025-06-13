@@ -7,6 +7,7 @@
 
 #define CAN_INT 13
 #define CAN_CS 12  
+#define CAN_BAUDRATE 125000
 
 // CBUS opcodes
 enum CBUS_OPC { NOOP = 0x00, ACON = 0x90, ACOF = 0x91 };

@@ -16,6 +16,8 @@ class Actions;
 #include "CBUSConfig.h"
 #include "AudioBoard.h"
 
+#define ACTIVITY_IDLE -1
+
 class Actions {
   
   Relay * relay;
@@ -30,7 +32,14 @@ class Actions {
   
 public:
 
-  Actions() : relay(nullptr), audio(nullptr), dispatcher(nullptr), keys(nullptr), keepAlive(nullptr), cbus(nullptr), config(nullptr), runningCount(0) {
+  Actions() : relay(nullptr), 
+              audio(nullptr), 
+              dispatcher(nullptr), 
+              keys(nullptr), 
+              keepAlive(nullptr), 
+              cbus(nullptr), 
+              config(nullptr), 
+              runningCount(ACTIVITY_IDLE){
   };
 
   // Initialize all static members
@@ -43,45 +52,34 @@ public:
     this->cbus = cbus;
     this->config = c;
   };
-  
-  // Start the motor
-  void startMotorAction(){
-    trace.log("Actions", "Starting motor");
-    relay->on();
-  };
 
-  // Stop the motor
-  void stopMotorAction(){
-    trace.log("Actions", "Stopping motor");
-    relay->off();
-  };
+  void checkPushButtonActivity(){
+    if(runningCount>0){
+      trace.log("Actions", "checkPushButtonActivity. Activity running", runningCount);
+      runningCount--; //Decrement 1 and keep going
+      return;
+    }
 
-  // Play the default track
-  void playDefaultTrackAction(){
-    trace.log("Actions", "Playing default track");
-    audio->play("001");
-  };
+    if(runningCount==0){
+      //Last tick -> disable activity
+      trace.log("Actions", "checkPushButtonActivity", "Activity completed");
+      relay->off();
+      audio->stopPlaying();
+      runningCount = ACTIVITY_IDLE;
+      return;
+    }
+  }
 
-  void checkKeysAction(){
-    if(keys->isA()){
-      trace.log("Actions", "Key A pressed");
-      if(runningCount == 0){  //Button was not pressed
-        startMotorAction();
-        playDefaultTrackAction();
-        runningCount = SEC_TO_TICKS(10);
+  void checkKeyAction(){
+    if(keys->isOn()){
+      trace.log("Actions", "checkKeysAction", "Key pressed");
+      if(runningCount == ACTIVITY_IDLE){  //Action is IDLE, start activity
+        trace.log("Actions", "checkKeysAction", "Activating relay & default audio");
+        relay->on();
+        audio->play(config->getDefaultAudio());
+        runningCount = SEC_TO_TICKS(15);
       }
       return;
-    }
-
-    if(runningCount > 1){
-      runningCount--;
-      return;
-    }
-
-    if(runningCount == 1){
-      stopMotorAction();
-      audio->stopPlaying();
-      runningCount = 0;
     }
   };
 
@@ -104,13 +102,11 @@ public:
       if(cmd == ACON){
         trace.log("Actions", "Event for activation of relay received");
         relay->on();
-        return;
-      }
-
-      if(cmd == ACOF){
-        trace.log("Actions", "Event for deactivation of relay received");
-        relay->off();
-        return;
+      } else {
+        if(cmd == ACOF){
+          trace.log("Actions", "Event for deactivation of relay received");
+          relay->off();
+        }
       }
     }
 
@@ -121,11 +117,12 @@ public:
         trace.log("Actions", "Event for activation of audio received");
         audio->play(track);
         return;
-      }
-      if(cmd == ACOF){
-        trace.log("Actions", "Event for deactivation of audio received");
-        audio->stopPlaying();
-        return;
+      } else {
+        if(cmd == ACOF){
+          trace.log("Actions", "Event for deactivation of audio received");
+          audio->stopPlaying();
+          return;
+        }
       }
     }
 

@@ -5,19 +5,21 @@
 
 #define DEBOUNCE_DELAY  500
 
+#define PUSHBUTTON_PIN 14
+
 class Keys {
 
   unsigned long lastDebounceTime;
+  int keyInput;
   
 public:
-  Keys(){
-    pinMode(KEY_A, INPUT_PULLUP);
-
+  Keys(int keyInput = PUSHBUTTON_PIN) : keyInput(keyInput){
+    pinMode(keyInput, INPUT_PULLUP);
     lastDebounceTime = millis();
   }
 
-  int isA(){
-    int reading = digitalRead(KEY_A);
+  int isOn(){
+    int reading = digitalRead(keyInput);
     
     if(reading == HIGH){
       return 0;

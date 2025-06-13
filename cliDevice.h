@@ -347,7 +347,7 @@ class CliDevice : public Cli {
     };
 
     void help_fs(){
-        out->println("Manages the SD card file system.");
+        out->println("Manages the SD card file system. Filesystem commands are disabled while audio is playing.");
         out->println("Options:");
         out->println("[ls|l|dir|L]: lists all files and directories in the root.");
         out->println("[mkdir|md|D {name}]: creates a directory with name {name}.");

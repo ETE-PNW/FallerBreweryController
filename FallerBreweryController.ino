@@ -24,7 +24,7 @@ Dispatcher<Actions> dispatcher(&actions);
 Keys keys;
 CBUS cbus;
 CBUSConfig config;
-Relay relay(RELAY_PIN);
+Relay relay;
 AudioBoard audio;
 
 /*
@@ -69,8 +69,9 @@ void setup(){
   actions.init(&relay, &audio, &cbus, &config, &keys, &dispatcher, keepAlive);
 
   // //Common actions -> 1 TICK = 1 sec (TICK_IN_MILLIS in Defaults.h) 
-  dispatcher.add("CBUS", "Looks for CBUS Commands", &Actions::checkCBUSCommandAction, 2);
-  dispatcher.add("KEYS", "Check for keys", &Actions::checkKeysAction, 1);
+  dispatcher.add("CBUS", "Looks for CBUS Commands", &Actions::checkCBUSCommandAction, SEC_TO_TICKS(1));
+  dispatcher.add("KEYS", "Check for Pushbutton press", &Actions::checkKeyAction, HALF_SECOND);       //These 2 tasks work jointly, and must have the same scheduling
+  dispatcher.add( "ACTI", "Checks module activity", &Actions::checkPushButtonActivity, HALF_SECOND);
 
   //Uncomment for testing actions through the CLIs
   #ifndef RELEASE

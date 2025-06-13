@@ -8,6 +8,8 @@
 
 enum { CBUS_CFG_INIT_OK, CBUS_CFG_INIT_FAIL };
 
+#define DEFAULT_TRACK -1
+
 class CBUSConfig {
 private:
     int nodeNumber = 0;
@@ -91,7 +93,7 @@ public:
       return relayEventNumber;
     }
 
-    char* getAudioByEventNumber(int eventNumber) {
+    char * getAudioByEventNumber(int eventNumber) {
 			for(int i = 0; i < eventCount; i++){
 				if(values[i] == eventNumber){
 					return keys[i];
@@ -99,6 +101,10 @@ public:
 			}
 			return nullptr;
     }
+
+	char * getDefaultAudio(){
+		return getAudioByEventNumber(DEFAULT_TRACK);
+	}
 
 private:
     // Read line from file into buffer, null-terminated
