@@ -528,11 +528,16 @@ class CliDevice : public Cli {
         out->print("Relay event number: ");
         out->println(ctx->config->getRelayEventNumber());
         for(int i = 0; i < ctx->config->getMappedSoundEvents(); i++){
+            int event = ctx->config->getMappedSoundEvent(i);
             out->print("Event [");
-            out->print(ctx->config->getMappedSoundEvent(i));
+            out->print(event);
             out->print("] mapped to track [");
             out->print(ctx->config->getMappedSoundTrack(i));
-            out->println("]");
+            if(event == 0){
+                out->println("] - Default");
+            } else {
+                out->println("]");
+            }
         }
         return CMD_OK;
     };
