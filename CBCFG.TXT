@@ -13,5 +13,5 @@ RELAY_EN=3
 003=7
 steam=8
 
-# -1 identifies default track (activated when pressing the push button)
-001=-1
+# 0 identifies default track (activated when pressing the push button)
+001=0
