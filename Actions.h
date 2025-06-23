@@ -6,12 +6,12 @@
 class Actions;
 
 #include "Defaults.h"
-#include "cli.h"
+#include "Cli.h"
 #include "Logger.h"
-#include "dispatcher.h"
-#include "utils.h"
-#include "relay.h"
-#include "keys.h"
+#include "Dispatcher.h"
+#include "Utils.h"
+#include "Relay.h"
+#include "Keys.h"
 #include "CBUS.h"
 #include "CBUSConfig.h"
 #include "AudioBoard.h"

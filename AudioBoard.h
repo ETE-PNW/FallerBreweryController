@@ -7,7 +7,7 @@
 #include <Adafruit_VS1053.h>
 
 #include "Logger.h"
-#include "wd.h"
+#include "WD.h"
 
 extern ConsoleLogger trace;
 extern ConsoleLogger info;

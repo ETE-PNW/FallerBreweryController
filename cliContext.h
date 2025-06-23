@@ -2,7 +2,7 @@
 #define CLI_CONTEXT_H
 
 #include "Defaults.h"
-#include "dispatcher.h"
+#include "Dispatcher.h"
 #include "CBUSConfig.h"
 
 class Relay;

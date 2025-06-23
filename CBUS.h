@@ -3,7 +3,7 @@
 
 #include <Adafruit_MCP2515.h>
 
-#include "defaults.h"
+#include "Defaults.h"
 
 #define CAN_INT 13
 #define CAN_CS 12  

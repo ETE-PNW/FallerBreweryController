@@ -2,13 +2,11 @@
 #define CBUSCONFIG_H
 
 #include <SD.h>
-
 #include <Arduino.h>
-#include <SD.h>
 
 enum { CBUS_CFG_INIT_OK, CBUS_CFG_INIT_FAIL };
 
-#define DEFAULT_TRACK -1
+#define DEFAULT_TRACK 0		//Default track is identified with the 'event=0'
 
 class CBUSConfig {
 private:
@@ -118,8 +116,9 @@ private:
 			buffer[index] = '\0';
     }
 
-    // Trim leading and trailing whitespace (in place)
-    void trim(char* str){
+    void trim(char* str) {
+  		char* original = str;  // Save the start of the buffer
+
 			// Left trim
 			while (isspace(*str)) ++str;
 
@@ -128,16 +127,11 @@ private:
 			while (end > str && isspace(*end)) --end;
 			*(end + 1) = '\0';
 
-			// Shift to front if needed
-			if (str != bufferStart(str)) {
-					memmove(bufferStart(str), str, strlen(str) + 1);
+			// Shift result back to original start
+			if (str != original) {
+				memmove(original, str, strlen(str) + 1);  // +1 to copy null terminator
 			}
-    }
-
-    // Get the start of the buffer to copy back trimmed data
-    char * bufferStart(char* str){
-      return str - (str - &str[0]); // pointer math trick
-    }
+		}
 };
 
 #endif

@@ -5,7 +5,7 @@
 
 class Actions;
 
-#include "cli.h"
+#include "Cli.h"
 #include "WD.h"
 #include "Dispatcher.h"
 #include "AudioBoard.h"

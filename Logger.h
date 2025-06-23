@@ -6,7 +6,7 @@
 
 #include "Defaults.h"
 #include "StringStream.h"
-#include "utils.h"
+#include "Utils.h"
 
 //Simple logger to console (Serial)
 class ConsoleLogger {

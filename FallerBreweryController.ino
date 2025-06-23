@@ -5,12 +5,12 @@
 #include <SDU.h>
 
 #include "Logger.h"
-#include "dispatcher.h"
+#include "Dispatcher.h"
 #include "Actions.h"
-#include "cliDevice.h"
+#include "CliDevice.h"
 #include "CBUS.h"
 #include "Keys.h"
-#include "relay.h"
+#include "Relay.h"
 #include "AudioBoard.h"
 #include "CBUSConfig.h"
 
@@ -43,6 +43,8 @@ static CliContext context = {
   .config = &config,
   .keepAlive = keepAlive
 };
+
+static CliDevice cli(&Serial, &Serial, &context);
 
 void setup(){
 
@@ -78,15 +80,12 @@ void setup(){
     dispatcher.disableAllActions();
   #endif
 
-  delay(1000);  // Magic delay
-
   trace.log("Main", "Startup complete");
   trace.log("Main - V:", DEVICE_VERSION); 
 
   //Last acction is to enable WDT with ~10 seconds alarm. Anything that will take time should call "keepALive" tpo avoid a reset.
   Watchdog.enable(WDT_TIMEOUT);
 }
-
 
 void loop(){
   
@@ -96,6 +95,5 @@ void loop(){
   dispatcher.dispatch();
 
   // If no actions, check if tehre are any commands on the terminal
-  CliDevice cli(&Serial, &Serial, &context);
   cli.run();
 }

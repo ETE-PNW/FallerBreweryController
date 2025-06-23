@@ -3,8 +3,8 @@
 
 #include <Stream.h>
 
-#include "cliContext.h"
-#include "defaults.h"
+#include "CliContext.h"
+#include "Defaults.h"
 
 typedef enum { CMD_OK, CMD_ERROR, CMD_EXIT, CMD_SKIP, CMD_HELP } CMD_RESULT;
 
